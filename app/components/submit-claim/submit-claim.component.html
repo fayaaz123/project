@@ -1,0 +1,113 @@
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card p-4 shadow-sm">
+        <h3 class="mb-4 text-center">Submit Insurance Claim</h3>
+        <form [formGroup]="claimForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+
+          <!-- Reason Selection -->
+          <div class="mb-3">
+            <label for="reason" class="form-label">Reason</label>
+            <select id="reason" formControlName="reason" (change)="onReasonChange($event)" class="form-select">
+              <option value="">Select a reason</option>
+              <option value="Accident">Accident</option>
+              <option value="Theft">Theft</option>
+              <option value="Natural Disaster">Natural Disaster</option>
+              <option value="Others">Others</option>
+            </select>
+            <div *ngIf="claimForm.get('reason')?.invalid && claimForm.get('reason')?.touched" class="text-danger">
+              <small>Reason is required.</small>
+            </div>
+          </div>
+
+          <!-- Custom Reason -->
+          <div class="mb-3" *ngIf="otherReasonVisible">
+            <label for="customReason" class="form-label">Custom Reason</label>
+            <input type="text" id="customReason" formControlName="customReason" class="form-control" />
+          </div>
+         <!-- Explanation -->
+<div class="mb-3">
+  <label for="explanation" class="form-label">Explanation</label>
+  <textarea
+    id="explanation"
+    formControlName="explanation"
+    rows="4"
+    class="form-control"
+    placeholder="E.g., The accident occurred on the highway near XYZ signal when a car rear-ended my vehicle during traffic. No injuries, but the bumper was damaged."
+  ></textarea>
+  <div *ngIf="claimForm.get('explanation')?.invalid && claimForm.get('explanation')?.touched" class="text-danger">
+    <small>Explanation is required and must be at least 10 characters.</small>
+  </div>
+</div>
+
+          <!-- Location (Updated with subfields) -->
+<div class="mb-3">
+  <label class="form-label">Location</label>
+
+  <!-- Street Name -->
+  <div class="mb-2">
+    <input type="text" formControlName="street" placeholder="Street Name" class="form-control" />
+    <div *ngIf="claimForm.get('street')?.invalid && claimForm.get('street')?.touched" class="text-danger">
+      <small>Street name is required and must be at least 3 characters.</small>
+    </div>
+  </div>
+
+  <!-- City -->
+  <div class="mb-2">
+    <input type="text" formControlName="city" placeholder="City" class="form-control" />
+    <div *ngIf="claimForm.get('city')?.invalid && claimForm.get('city')?.touched" class="text-danger">
+      <small>City is required and should contain only letters.</small>
+    </div>
+  </div>
+
+  <!-- State -->
+  <div class="mb-2">
+    <input type="text" formControlName="state" placeholder="State" class="form-control" />
+    <div *ngIf="claimForm.get('state')?.invalid && claimForm.get('state')?.touched" class="text-danger">
+      <small>State is required and should contain only letters.</small>
+    </div>
+  </div>
+
+  <!-- Pincode -->
+  <div class="mb-2">
+    <input type="text" formControlName="pincode" placeholder="Pincode" class="form-control" />
+    <div *ngIf="claimForm.get('pincode')?.invalid && claimForm.get('pincode')?.touched" class="text-danger">
+      <small>Pincode is required and must be a 6-digit number.</small>
+    </div>
+  </div>
+</div>
+
+
+          <!-- Photo Upload -->
+          <div class="mb-3">
+            <label for="photoUpload" class="form-label">Upload Incident Photos (JPG, PNG)</label>
+            <input type="file" class="form-control" id="photoUpload" (change)="onPhotoUpload($event)" multiple accept=".jpg, .jpeg, .png" />
+            <!-- 📸 Image Previews -->
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <img *ngFor="let preview of photoPreviews"
+                   [src]="preview"
+                   alt="Photo preview"
+                   style="width: 100px; height: 100px; object-fit: cover; border: 1px solid #ccc; border-radius: 8px;" />
+            </div>
+          </div>
+
+          <!-- Police Report Upload -->
+          <div class="mb-3">
+            <label for="policeReport" class="form-label">Upload Police Report (PDF Only)</label>
+            <input type="file" id="policeReport" (change)="onPdfUpload($event)" accept="application/pdf" class="form-control" />
+            <div *ngIf="pdfFile" class="text-success mt-2">
+              <small>📄 Police report uploaded: {{ pdfFile.name }}</small>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid">
+            <button type="submit" [disabled]="claimForm.invalid || isSubmitting" class="btn btn-primary">
+              {{ isSubmitting ? 'Submitting...' : 'Submit Claim' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

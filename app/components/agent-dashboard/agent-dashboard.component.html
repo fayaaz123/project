@@ -1,0 +1,109 @@
+<div class="container my-4">
+  <h2 class="text-center mb-3">Agent Claim Dashboard</h2>
+
+  <!-- Filters -->
+  <div class="d-flex flex-wrap gap-3 mb-3 justify-content-between align-items-center">
+    <div>
+      <select [(ngModel)]="statusFilter" (change)="onStatusChange(statusFilter)" class="form-select">
+        <option value="ALL">All Claims</option>
+        <option value="APPROVED">Approved</option>
+        <option value="REJECTED">Rejected</option>
+        <option value="OPEN">Open</option>
+      </select>
+    </div>
+
+    <div class="input-group w-50">
+      <input
+        [(ngModel)]="searchText"
+        (input)="onSearchChange()"
+        type="text"
+        class="form-control"
+        placeholder="Search by Claim ID or City"
+      />
+    </div>
+  </div>
+
+  <!-- Claims Table -->
+  <div *ngIf="isLoading">Loading claims...</div>
+
+  <div *ngIf="!isLoading && filteredClaims.length === 0" class="text-muted">No claims found.</div>
+
+  <div *ngIf="!isLoading && filteredClaims.length > 0">
+    <table class="table table-bordered table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Claim ID</th>
+          <th>Status</th>
+          <th>City</th>
+          <th>Submitted On</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let claim of filteredClaims">
+          <td>{{ claim.claimId }}</td>
+          <td>
+            <span 
+              class="badge"
+              [ngClass]="{
+                'bg-warning': claim.status === 'OPEN',
+                'bg-success': claim.status === 'APPROVED',
+                'bg-danger': claim.status === 'REJECTED'
+              }">
+              {{ claim.status }}
+            </span>
+          </td>
+          
+          <td>{{ claim.location?.city }}</td>
+          <td>{{ claim.createdAt | date: 'short' }}</td>
+          <td>
+            <button class="btn btn-sm btn-info me-2" (click)="openModal(claim)">View</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal Popup -->
+  <div *ngIf="modalOpen && selectedClaim" class="modal-overlay">
+    <div class="modal-content">
+      <button class="close-btn" (click)="closeModal()">X</button>
+  
+      <h4 class="mb-3">Claim Details</h4>
+  
+      <p><strong>Status:</strong> {{ selectedClaim.status }}</p>
+      <p><strong>Reason:</strong> {{ selectedClaim.reason }}</p>
+      <p *ngIf="selectedClaim.customReason"><strong>Custom Reason:</strong> {{ selectedClaim.customReason }}</p>
+      <p><strong>Explanation:</strong> {{ selectedClaim.explanation }}</p>
+      <p><strong>Location:</strong> {{ selectedClaim.location.street }}, {{ selectedClaim.location.city }}, {{ selectedClaim.location.state }} - {{ selectedClaim.location.pincode }}</p>
+  
+      <!-- Photos -->
+      <div class="mb-3">
+        <strong>Uploaded Photos:</strong>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          <img *ngFor="let photo of selectedClaim.photos"
+               [src]="'http://localhost:3000/' + photo"
+               alt="Photo"
+               style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc;" />
+        </div>
+      </div>
+  
+      <!-- Police Report -->
+      <div class="mb-3">
+        <strong>Police Report:</strong>
+        <a [href]="'http://localhost:3000/' + selectedClaim.policeReport" target="_blank" class="btn btn-sm btn-outline-primary">
+          View PDF
+        </a>
+      </div>
+  
+      <!-- Approve / Reject -->
+      <div class="d-flex gap-3 mt-4">
+        <button class="btn btn-success" (click)="approveSelectedClaim()" [disabled]="selectedClaim.status !== 'OPEN' || isSubmitting">Approve</button>
+        <button class="btn btn-danger" (click)="rejectSelectedClaim()" [disabled]="selectedClaim.status !== 'OPEN' || isSubmitting">Reject</button>
+      </div>
+  
+      <div *ngIf="selectedClaim.status === 'REJECTED'" class="mt-3 text-danger">
+        <strong>Rejection Reason:</strong> {{ selectedClaim.rejectionReason }}
+      </div>
+    </div>
+  </div>

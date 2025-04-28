@@ -1,0 +1,118 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<div class="container my-5">
+  <h2 class="text-center mb-5 heading">Track Your Claims</h2>
+
+  <div *ngIf="isLoading" class="text-center loading-message">Loading your claims...</div>
+
+  <div *ngIf="!isLoading && claims.length === 0" class="text-center no-claims-message">
+    No claims found.
+  </div>
+
+  <div class="row g-4" *ngIf="!isLoading && claims.length > 0">
+    <div class="col-md-4" *ngFor="let claim of claims">
+      <div class="card claim-card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-2">Claim ID: {{ claim.claimId }}</h5>
+          <p class="mb-3"><i class="fas fa-map-marker-alt me-2 text-primary"></i> {{ claim.location.city }}</p>
+
+          <div class="badge-group mb-3">
+            <span class="badge status-badge" [ngClass]="getAgentStatusColor(claim.status)">Agent: {{ claim.status }}</span>
+            <span class="badge status-badge" [ngClass]="getAdminStatusColor(claim.adminFinalStatus)">Admin: {{ claim.adminFinalStatus }}</span>
+          </div>
+
+          <button class="btn btn-view" (click)="openModal(claim)">View Progress</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="modalOpen && selectedClaim" class="modal-overlay">
+    <div class="modal-container">
+      <button class="close-btn" (click)="closeModal()"><i class="fas fa-times"></i></button>
+
+      <div class="row">
+        <!-- Left side -->
+        <div class="col-md-7 modal-details">
+          <h4>Claim Details</h4>
+          <div class="details-list">
+            <p><strong>Reason:</strong> {{ selectedClaim.reason }}</p>
+            <p *ngIf="selectedClaim.customReason"><strong>Custom Reason:</strong> {{ selectedClaim.customReason }}</p>
+            <p><strong>Explanation:</strong> {{ selectedClaim.explanation }}</p>
+            <p><strong>Location:</strong> {{ selectedClaim.location.street }}, {{ selectedClaim.location.city }}, {{ selectedClaim.location.state }} - {{ selectedClaim.location.pincode }}</p>
+          </div>
+
+          <div class="media-section">
+            <h6>Uploaded Photos:</h6>
+            <div class="photo-grid">
+              <img *ngFor="let photo of selectedClaim.photos"
+                   [src]="'http://localhost:3000/' + photo"
+                   alt="Photo"
+                   class="uploaded-photo" />
+            </div>
+          </div>
+
+          <div class="media-section">
+            <h6>Police Report:</h6>
+            <a [href]="'http://localhost:3000/' + selectedClaim.policeReport" target="_blank" class="btn btn-sm btn-report">
+              View PDF
+            </a>
+          </div>
+
+          <div *ngIf="selectedClaim.status === 'REJECTED'" class="alert alert-danger">
+            <strong>Agent Rejection Reason:</strong> {{ selectedClaim.rejectionReason }}
+          </div>
+          <div *ngIf="selectedClaim.adminFinalStatus === 'ADMIN_REJECTED'" class="alert alert-danger">
+            <strong>Admin Rejection Reason:</strong> {{ selectedClaim.adminRejectionReason }}
+          </div>
+        </div>
+
+        <!-- Right side -->
+        <div class="col-md-5 modal-progress">
+          <h4>Claim Progress</h4>
+          <div class="stepper">
+            <div class="step completed">
+              <div class="circle"><i class="fas fa-file-upload"></i></div>
+              <div class="step-label">Submitted</div>
+            </div>
+
+            <div class="line"></div>
+
+            <div class="step" [ngClass]="{
+              'completed': selectedClaim.status === 'APPROVED',
+              'rejected': selectedClaim.status === 'REJECTED',
+              'pending': selectedClaim.status === 'OPEN'
+            }">
+              <div class="circle"><i class="fas fa-user-check"></i></div>
+              <div class="step-label">Agent Review</div>
+            </div>
+
+            <div class="line"></div>
+
+            <div class="step" [ngClass]="{
+              'completed': selectedClaim.adminFinalStatus === 'ADMIN_APPROVED',
+              'rejected': selectedClaim.adminFinalStatus === 'ADMIN_REJECTED',
+              'pending': selectedClaim.adminFinalStatus === 'PENDING'
+            }">
+              <div class="circle"><i class="fas fa-gavel"></i></div>
+              <div class="step-label">Admin Review</div>
+            </div>
+
+            <div class="line"></div>
+
+            <div class="step" [ngClass]="{
+              'completed': selectedClaim.adminFinalStatus === 'ADMIN_APPROVED',
+              'rejected': selectedClaim.adminFinalStatus === 'ADMIN_REJECTED',
+              'pending': selectedClaim.adminFinalStatus === 'PENDING'
+            }">
+              <div class="circle"><i class="fas fa-check-double"></i></div>
+              <div class="step-label">Final Decision</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

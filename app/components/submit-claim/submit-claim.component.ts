@@ -24,6 +24,8 @@ export class SubmitClaimComponent {
     private claimService: ClaimService
   ) {
     this.claimForm = this.fb.group({
+      fullName: ['', [Validators.required, Validators.minLength(3)]],
+      email: ['', [Validators.required, Validators.email]],
       reason: ['', Validators.required],
       customReason: [''],
       explanation: ['', [Validators.required, Validators.minLength(10)]],
@@ -36,7 +38,6 @@ export class SubmitClaimComponent {
     });    
   }
 
-  // Toggle visibility of "Other Reason" field
   onReasonChange(event: Event) {
     const value = (event.target as HTMLSelectElement).value;
     this.otherReasonVisible = value === 'Others';
@@ -45,7 +46,6 @@ export class SubmitClaimComponent {
     }
   }
 
-  // Handle image uploads
   onPhotoUpload(event: any) {
     const files: File[] = Array.from(event.target.files);
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
@@ -62,7 +62,6 @@ export class SubmitClaimComponent {
     }
   }
 
-  // Handle police report PDF upload
   onPdfUpload(event: any) {
     const file = event.target.files[0];
     if (file && file.type === 'application/pdf') {
@@ -72,7 +71,6 @@ export class SubmitClaimComponent {
     }
   }
 
-  // Submit form
   onSubmit() {
     if (this.claimForm.invalid) {
       this.claimForm.markAllAsTouched();
@@ -84,6 +82,8 @@ export class SubmitClaimComponent {
     const formData = new FormData();
     const formValue = this.claimForm.value;
 
+    formData.append('fullName', formValue.fullName);
+    formData.append('email', formValue.email);
     formData.append('reason', formValue.reason);
     if (formValue.reason === 'Others') {
       formData.append('customReason', formValue.customReason);
@@ -102,7 +102,6 @@ export class SubmitClaimComponent {
       formData.append('policeReport', this.pdfFile);
     }
 
-    // Call the service to submit the claim
     this.claimService.submitClaim(formData).subscribe({
       next: (response) => {
         console.log('✅ Claim submitted successfully:', response);
@@ -117,7 +116,6 @@ export class SubmitClaimComponent {
     });
   }
 
-  // Reset form and state
   private resetForm() {
     this.claimForm.reset();
     this.claimForm.markAsPristine();
@@ -128,9 +126,9 @@ export class SubmitClaimComponent {
     this.otherReasonVisible = false;
     this.isSubmitting = false;
   }
- // Helper to show validation errors in template
-    isFieldInvalid(field: string): boolean {
-      const control = this.claimForm.get(field);
-      return !!(control && control.invalid && (control.dirty || control.touched));
-    }
+
+  isFieldInvalid(field: string): boolean {
+    const control = this.claimForm.get(field);
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
+}

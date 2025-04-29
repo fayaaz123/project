@@ -17,21 +17,28 @@ export class StatusTrackerComponent implements OnInit {
   modalOpen = false;
   isLoading = false;
 
+  emailInput: string = '';
+  emailSubmitted: boolean = false;
+
   constructor(private claimService: ClaimService) {}
 
-  ngOnInit(): void {
-    this.fetchClaims();
-  }
+  ngOnInit(): void {}
 
+  // Triggered after entering email
   fetchClaims(): void {
+    if (!this.emailInput || !this.emailInput.trim()) return;
+
     this.isLoading = true;
-    this.claimService.getAllClaims().subscribe({
+    this.emailSubmitted = true;
+
+    this.claimService.getClaimsByEmail(this.emailInput.trim().toLowerCase()).subscribe({
       next: (res: Claim[]) => {
         this.claims = res;
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Error fetching claims:', err);
+        this.claims = [];
         this.isLoading = false;
       }
     });

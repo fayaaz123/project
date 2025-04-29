@@ -2,6 +2,23 @@
 
 <div class="container my-5">
   <h2 class="text-center mb-5 heading">Track Your Claims</h2>
+  <div class="mb-4 w-50 mx-auto">
+    <label for="email" class="form-label">Enter your email to track claims:</label>
+    <div class="input-group">
+      <input
+        type="email"
+        class="form-control"
+        id="email"
+        [(ngModel)]="emailInput"
+        placeholder="your-email@example.com"
+        [disabled]="isLoading"
+      />
+      <button class="btn btn-outline-primary" (click)="fetchClaims()" [disabled]="isLoading || !emailInput">
+        Check
+      </button>
+    </div>
+  </div>
+  
 
   <div *ngIf="isLoading" class="text-center loading-message">Loading your claims...</div>
 

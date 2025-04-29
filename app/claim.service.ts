@@ -26,6 +26,9 @@ export class ClaimService {
   getClaimsByStatus(status: string): Observable<Claim[]> {
     return this.http.get<Claim[]>(`${this.apiUrl}?status=${status}`);
   }
+  getClaimsByEmail(email: string) {
+    return this.http.get<Claim[]>(`${this.apiUrl}?email=${email}`);
+  }
   
   approveClaim(id: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/approve`, {});

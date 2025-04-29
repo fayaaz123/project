@@ -1,0 +1,145 @@
+//update in schema models/claim.js
+  email: { type: String, required: true },
+  fullName: { type: String, required: true },
+//router js updated code
+const express = require('express');
+const router = express.Router();
+const Claim = require('../models/claim');
+const upload = require('../middleware/upload');
+
+function generateClaimId() {
+  const numbers = Math.floor(100 + Math.random() * 900); // 3-digit number
+  const letters = Array(3)
+    .fill('')
+    .map(() => String.fromCharCode(65 + Math.floor(Math.random() * 26))) // Random uppercase letters
+    .join('');
+  return `${numbers}${letters}`;
+}
+
+// ✅ GET /api/claims?status=APPROVED&email=abc@gmail.com
+router.get('/', async (req, res) => {
+  try {
+    const { status, email } = req.query;
+    const query = {};
+
+    if (status) query.status = status.toUpperCase();
+    if (email) query.email = email.toLowerCase();
+
+    const claims = await Claim.find(query).sort({ createdAt: -1 });
+    res.status(200).json(claims);
+  } catch (error) {
+    console.error('❌ Error fetching claims:', error.message);
+    res.status(500).json({ error: 'Server error while fetching claims' });
+  }
+});
+
+// ✅ POST /api/claims (User submits claim)
+router.post('/', upload.fields([
+  { name: 'photos', maxCount: 5 },
+  { name: 'policeReport', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const { fullName, email, reason, customReason, explanation, street, city, state, pincode } = req.body;
+    const photoPaths = (req.files['photos'] || []).map(file => file.path);
+    const policeReportPath = req.files['policeReport']?.[0]?.path || null;
+
+    const newClaim = new Claim({
+      claimId: generateClaimId(),
+      fullName,
+      email: email.toLowerCase(),
+      reason,
+      customReason,
+      explanation,
+      location: { street, city, state, pincode },
+      photos: photoPaths,
+      policeReport: policeReportPath,
+      status: 'OPEN',
+      rejectionReason: null,
+      adminFinalStatus: 'PENDING',
+      adminRejectionReason: null
+    });
+
+    await newClaim.save();
+    res.status(201).json({ message: 'Claim submitted successfully!', data: newClaim });
+  } catch (error) {
+    console.error('❌ Claim submission failed:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ✅ PUT /api/claims/:id/approve (Agent Approves)
+router.put('/:id/approve', async (req, res) => {
+  try {
+    const updatedClaim = await Claim.findOneAndUpdate(
+      { claimId: req.params.id },
+      { status: 'APPROVED', rejectionReason: null },
+      { new: true }
+    );
+    if (!updatedClaim) return res.status(404).json({ error: 'Claim not found' });
+    res.status(200).json({ message: 'Claim approved', data: updatedClaim });
+  } catch (error) {
+    console.error('❌ Error approving claim:', error.message);
+    res.status(500).json({ error: 'Server error while approving claim' });
+  }
+});
+
+// ✅ PUT /api/claims/:id/reject (Agent Rejects)
+router.put('/:id/reject', async (req, res) => {
+  try {
+    const { rejectionReason } = req.body;
+    if (!rejectionReason || rejectionReason.trim() === '') {
+      return res.status(400).json({ error: 'Rejection reason is required' });
+    }
+
+    const updatedClaim = await Claim.findOneAndUpdate(
+      { claimId: req.params.id },
+      { status: 'REJECTED', rejectionReason },
+      { new: true }
+    );
+    if (!updatedClaim) return res.status(404).json({ error: 'Claim not found' });
+    res.status(200).json({ message: 'Claim rejected', data: updatedClaim });
+  } catch (error) {
+    console.error('❌ Error rejecting claim:', error.message);
+    res.status(500).json({ error: 'Server error while rejecting claim' });
+  }
+});
+
+// ✅ PUT /api/claims/:id/admin-approve (Admin Final Approves)
+router.put('/:id/admin-approve', async (req, res) => {
+  try {
+    const updatedClaim = await Claim.findOneAndUpdate(
+      { claimId: req.params.id },
+      { adminFinalStatus: 'ADMIN_APPROVED', adminRejectionReason: null },
+      { new: true }
+    );
+    if (!updatedClaim) return res.status(404).json({ error: 'Claim not found' });
+    res.status(200).json({ message: 'Claim finally approved by Admin', data: updatedClaim });
+  } catch (error) {
+    console.error('❌ Error final approving claim:', error.message);
+    res.status(500).json({ error: 'Server error while final approving claim' });
+  }
+});
+
+// ✅ PUT /api/claims/:id/admin-reject (Admin Final Rejects)
+router.put('/:id/admin-reject', async (req, res) => {
+  try {
+    const { adminRejectionReason } = req.body;
+    if (!adminRejectionReason || adminRejectionReason.trim() === '') {
+      return res.status(400).json({ error: 'Admin rejection reason is required' });
+    }
+
+    const updatedClaim = await Claim.findOneAndUpdate(
+      { claimId: req.params.id },
+      { adminFinalStatus: 'ADMIN_REJECTED', adminRejectionReason },
+      { new: true }
+    );
+    if (!updatedClaim) return res.status(404).json({ error: 'Claim not found' });
+    res.status(200).json({ message: 'Claim finally rejected by Admin', data: updatedClaim });
+  } catch (error) {
+    console.error('❌ Error final rejecting claim:', error.message);
+    res.status(500).json({ error: 'Server error while final rejecting claim' });
+  }
+});
+
+module.exports = router;
+console.log('✅ Claim Routes Loaded');

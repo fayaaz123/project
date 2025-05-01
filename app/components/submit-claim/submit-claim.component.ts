@@ -70,7 +70,18 @@ export class SubmitClaimComponent {
       alert('❌ Only PDF files are allowed for the police report.');
     }
   }
-
+  removePhoto(index: number): void {
+    if (this.photoPreviews && this.photoPreviews.length > index) {
+      // Remove the photo from previews array
+      this.photoPreviews.splice(index, 1);
+      
+      // If you're also maintaining a separate array of File objects for upload,
+      // you should remove the corresponding file as well
+      if (this.photoFiles && this.photoFiles.length > index) {
+        this.photoFiles.splice(index, 1);
+      }
+    }
+  }
   onSubmit() {
     if (this.claimForm.invalid) {
       this.claimForm.markAllAsTouched();

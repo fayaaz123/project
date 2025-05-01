@@ -1,130 +1,176 @@
-<div class="container my-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card p-4 shadow-sm">
-        <h3 class="mb-4 text-center">Submit Insurance Claim</h3>
-        <form [formGroup]="claimForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
-<!-- Full Name -->
-<div class="mb-3">
-  <label for="fullName" class="form-label">Full Name</label>
-  <input type="text" id="fullName" formControlName="fullName" class="form-control" placeholder="Enter your name" />
-  <div *ngIf="isFieldInvalid('fullName')" class="text-danger">
-    <small>Name is required and must be at least 3 characters.</small>
-  </div>
-</div>
-
-<!-- Email -->
-<div class="mb-3">
-  <label for="email" class="form-label">Email</label>
-  <input type="email" id="email" formControlName="email" class="form-control" placeholder="Enter your email" />
-  <div *ngIf="isFieldInvalid('email')" class="text-danger">
-    <small>A valid email is required.</small>
-  </div>
-</div>
-
-          <!-- Reason Selection -->
-          <div class="mb-3">
-            <label for="reason" class="form-label">Reason</label>
-            <select id="reason" formControlName="reason" (change)="onReasonChange($event)" class="form-select">
-              <option value="">Select a reason</option>
-              <option value="Accident">Accident</option>
-              <option value="Theft">Theft</option>
-              <option value="Natural Disaster">Natural Disaster</option>
-              <option value="Others">Others</option>
-            </select>
-            <div *ngIf="claimForm.get('reason')?.invalid && claimForm.get('reason')?.touched" class="text-danger">
-              <small>Reason is required.</small>
-            </div>
-          </div>
-
-          <!-- Custom Reason -->
-          <div class="mb-3" *ngIf="otherReasonVisible">
-            <label for="customReason" class="form-label">Custom Reason</label>
-            <input type="text" id="customReason" formControlName="customReason" class="form-control" />
-          </div>
-         <!-- Explanation -->
-<div class="mb-3">
-  <label for="explanation" class="form-label">Explanation</label>
-  <textarea
-    id="explanation"
-    formControlName="explanation"
-    rows="4"
-    class="form-control"
-    placeholder="E.g., The accident occurred on the highway near XYZ signal when a car rear-ended my vehicle during traffic. No injuries, but the bumper was damaged."
-  ></textarea>
-  <div *ngIf="claimForm.get('explanation')?.invalid && claimForm.get('explanation')?.touched" class="text-danger">
-    <small>Explanation is required and must be at least 10 characters.</small>
-  </div>
-</div>
-
-          <!-- Location (Updated with subfields) -->
-<div class="mb-3">
-  <label class="form-label">Location</label>
-
-  <!-- Street Name -->
-  <div class="mb-2">
-    <input type="text" formControlName="street" placeholder="Street Name" class="form-control" />
-    <div *ngIf="claimForm.get('street')?.invalid && claimForm.get('street')?.touched" class="text-danger">
-      <small>Street name is required and must be at least 3 characters.</small>
-    </div>
+<div class="claim-form-container">
+  <!-- Decorative vehicle icons in background -->
+  <div class="vehicle-icons">
+    <i class="icon-car"></i>
+    <i class="icon-motorcycle"></i>
+    <i class="icon-truck"></i>
+    <i class="icon-bicycle"></i>
   </div>
 
-  <!-- City -->
-  <div class="mb-2">
-    <input type="text" formControlName="city" placeholder="City" class="form-control" />
-    <div *ngIf="claimForm.get('city')?.invalid && claimForm.get('city')?.touched" class="text-danger">
-      <small>City is required and should contain only letters.</small>
-    </div>
-  </div>
-
-  <!-- State -->
-  <div class="mb-2">
-    <input type="text" formControlName="state" placeholder="State" class="form-control" />
-    <div *ngIf="claimForm.get('state')?.invalid && claimForm.get('state')?.touched" class="text-danger">
-      <small>State is required and should contain only letters.</small>
-    </div>
-  </div>
-
-  <!-- Pincode -->
-  <div class="mb-2">
-    <input type="text" formControlName="pincode" placeholder="Pincode" class="form-control" />
-    <div *ngIf="claimForm.get('pincode')?.invalid && claimForm.get('pincode')?.touched" class="text-danger">
-      <small>Pincode is required and must be a 6-digit number.</small>
-    </div>
-  </div>
-</div>
-
-
-          <!-- Photo Upload -->
-          <div class="mb-3">
-            <label for="photoUpload" class="form-label">Upload Incident Photos (JPG, PNG)</label>
-            <input type="file" class="form-control" id="photoUpload" (change)="onPhotoUpload($event)" multiple accept=".jpg, .jpeg, .png" />
-            <!-- 📸 Image Previews -->
-            <div class="d-flex flex-wrap gap-2 mt-2">
-              <img *ngFor="let preview of photoPreviews"
-                   [src]="preview"
-                   alt="Photo preview"
-                   style="width: 100px; height: 100px; object-fit: cover; border: 1px solid #ccc; border-radius: 8px;" />
-            </div>
-          </div>
-
-          <!-- Police Report Upload -->
-          <div class="mb-3">
-            <label for="policeReport" class="form-label">Upload Police Report (PDF Only)</label>
-            <input type="file" id="policeReport" (change)="onPdfUpload($event)" accept="application/pdf" class="form-control" />
-            <div *ngIf="pdfFile" class="text-success mt-2">
-              <small>📄 Police report uploaded: {{ pdfFile.name }}</small>
-            </div>
-          </div>
-
-          <!-- Submit Button -->
-          <div class="d-grid">
-            <button type="submit" [disabled]="claimForm.invalid || isSubmitting" class="btn btn-primary">
-              {{ isSubmitting ? 'Submitting...' : 'Submit Claim' }}
-            </button>
-          </div>
-        </form>
+  <div class="form-card">
+    <div class="form-header">
+      <h2>Auto Insurance Claim Submission</h2>
+      <p class="subtitle">Complete this form to submit your vehicle insurance claim</p>
+      <div class="progress-steps">
+        <div class="step active">Claim Details</div>
+        <!-- <div class="step">2. Documentation</div>
+        <div class="step">3. Review</div> -->
       </div>
     </div>
+
+    <form [formGroup]="claimForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+      <div class="form-section">
+        <h3 class="section-title"><i class="bi bi-person-circle"></i> Personal Information</h3>
+        
+        <!-- Full Name -->
+        <div class="form-floating mb-4">
+          <input type="text" id="fullName" formControlName="fullName" class="form-control" 
+                 placeholder="Enter your name" [ngClass]="{'is-invalid': isFieldInvalid('fullName')}">
+          <label for="fullName">Full Name</label>
+          <div *ngIf="isFieldInvalid('fullName')" class="invalid-feedback">
+            Name is required and must be at least 3 characters
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-floating mb-4">
+          <input type="email" id="email" formControlName="email" class="form-control" 
+                 placeholder="Enter your email" [ngClass]="{'is-invalid': isFieldInvalid('email')}">
+          <label for="email">Email Address</label>
+          <div *ngIf="isFieldInvalid('email')" class="invalid-feedback">
+            Please enter a valid email address
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="section-title"><i class="bi bi-car-front"></i> Incident Details</h3>
+        
+        <!-- Reason Selection -->
+        <div class="mb-4">
+          <label for="reason" class="form-label">Incident Type</label>
+          <select id="reason" formControlName="reason" (change)="onReasonChange($event)" 
+                  class="form-select" [ngClass]="{'is-invalid': claimForm.get('reason')?.invalid && claimForm.get('reason')?.touched}">
+            <option value="">Select incident type</option>
+            <option value="Accident">Vehicle Accident</option>
+            <option value="Theft">Theft or Vandalism</option>
+            <option value="Natural Disaster">Natural Disaster</option>
+            <option value="Others">Other Incident</option>
+          </select>
+          <div *ngIf="claimForm.get('reason')?.invalid && claimForm.get('reason')?.touched" class="invalid-feedback">
+            Please select an incident type
+          </div>
+        </div>
+
+        <!-- Custom Reason -->
+        <div class="mb-4" *ngIf="otherReasonVisible">
+          <div class="form-floating">
+            <input type="text" id="customReason" formControlName="customReason" 
+                   class="form-control" placeholder="Please specify">
+            <label for="customReason">Specify Incident Type</label>
+          </div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="mb-4">
+          <label for="explanation" class="form-label">Incident Description</label>
+          <textarea id="explanation" formControlName="explanation" rows="4" 
+                    class="form-control" [ngClass]="{'is-invalid': claimForm.get('explanation')?.invalid && claimForm.get('explanation')?.touched}"
+                    placeholder="Provide detailed information about the incident including date, time, and circumstances"></textarea>
+          <div *ngIf="claimForm.get('explanation')?.invalid && claimForm.get('explanation')?.touched" class="invalid-feedback">
+            Please provide a detailed description (minimum 10 characters)
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="mb-4">
+          <label class="form-label"><i class="bi bi-geo-alt"></i> Incident Location</label>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="text" formControlName="street" class="form-control" 
+                       placeholder="Street Address" [ngClass]="{'is-invalid': claimForm.get('street')?.invalid && claimForm.get('street')?.touched}">
+                <label>Street Address</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="text" formControlName="city" class="form-control" 
+                       placeholder="City" [ngClass]="{'is-invalid': claimForm.get('city')?.invalid && claimForm.get('city')?.touched}">
+                <label>City</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="text" formControlName="state" class="form-control" 
+                       placeholder="State" [ngClass]="{'is-invalid': claimForm.get('state')?.invalid && claimForm.get('state')?.touched}">
+                <label>State/Province</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="text" formControlName="pincode" class="form-control" 
+                       placeholder="Postal Code" [ngClass]="{'is-invalid': claimForm.get('pincode')?.invalid && claimForm.get('pincode')?.touched}">
+                <label>Postal/Zip Code</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="section-title"><i class="bi bi-file-earmark-arrow-up"></i> Supporting Documents</h3>
+        
+        <!-- Photo Upload -->
+        <div class="mb-4">
+          <label class="form-label">Damage Photos (Max 5 images)</label>
+          <div class="file-upload-box" [ngClass]="{'has-files': photoPreviews.length > 0}">
+            <input type="file" id="photoUpload" (change)="onPhotoUpload($event)" 
+                   multiple accept=".jpg, .jpeg, .png" class="d-none">
+            <label for="photoUpload" class="upload-label">
+              <i class="bi bi-camera"></i>
+              <span>{{ photoPreviews.length > 0 ? 'Add more photos' : 'Click to upload photos' }}</span>
+            </label>
+            <div class="preview-grid">
+              <div class="preview-item" *ngFor="let preview of photoPreviews; let i = index">
+                <img [src]="preview" alt="Damage photo" class="preview-image">
+                <button type="button" class="remove-btn" (click)="removePhoto(i)">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <small class="text-muted">Upload clear photos showing all damage (JPG/PNG)</small>
+        </div>
+
+        <!-- Police Report Upload -->
+        <div class="mb-4">
+          <label class="form-label">Police Report (PDF only)</label>
+          <div class="file-upload-box" [ngClass]="{'has-file': pdfFile}">
+            <input type="file" id="policeReport" (change)="onPdfUpload($event)" 
+                   accept="application/pdf" class="d-none">
+            <label for="policeReport" class="upload-label">
+              <i class="bi bi-file-earmark-pdf"></i>
+              <span>{{ pdfFile ? pdfFile.name : 'Click to upload police report' }}</span>
+            </label>
+            <button *ngIf="pdfFile" type="button" class="remove-btn" (click)="pdfFile = null">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+          <small class="text-muted">If available, upload the official police report</small>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button type="submit" [disabled]="claimForm.invalid || isSubmitting" class="submit-btn">
+          <span *ngIf="!isSubmitting">Submit Claim</span>
+          <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span *ngIf="isSubmitting">Processing...</span>
+        </button>
+        <small class="disclaimer-text">
+          By submitting this claim, you confirm that all information provided is accurate to the best of your knowledge.
+        </small>
+      </div>
+    </form>
   </div>
 </div>

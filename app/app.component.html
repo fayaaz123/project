@@ -1,3 +1,14 @@
-<app-submit-claim></app-submit-claim>
+<!-- <app-submit-claim></app-submit-claim> -->
+<!-- <app-status-tracker></app-status-tracker> -->
  <!-- <app-agent-dashboard></app-agent-dashboard> -->
  <!-- <app-admin-dashboard></app-admin-dashboard> -->
+ <nav class="nav justify-content-center gap-4 my-3">
+    <a routerLink="/submit-claim" routerLinkActive="active" class="nav-link">User - Submit</a>
+    <a routerLink="/track-status" routerLinkActive="active" class="nav-link">User - Track</a>
+    <a routerLink="/agent-dashboard" routerLinkActive="active" class="nav-link">Agent</a>
+    <a routerLink="/admin-dashboard" routerLinkActive="active" class="nav-link">Admin</a>
+  </nav>
+  
+  <router-outlet></router-outlet>
+  <app-admin-insights></app-admin-insights>
+  

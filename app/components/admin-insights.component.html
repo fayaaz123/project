@@ -1,0 +1,134 @@
+<div class="dashboard-container" @fadeInOnEnter>
+    <h2 class="dashboard-title">Claims Analytics Dashboard</h2>
+    
+    <!-- Metric Cards -->
+    <div class="cards-grid" @fadeInUpOnEnter>
+      <div class="metric-card total-claims" @zoomInOnEnter>
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h5>Total Claims</h5>
+          <p class="metric-value">{{ totalClaims }}</p>
+          <p class="metric-change">All time records</p>
+        </div>
+      </div>
+  
+      <div class="metric-card agent-approved" @zoomInOnEnter>
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h5>Agent Approved</h5>
+          <p class="metric-value">{{ agentApproved }}</p>
+          <p class="metric-change">{{ (agentApproved / totalClaims * 100 || 0) | number:'1.0-1' }}% of total</p>
+        </div>
+      </div>
+  
+      <div class="metric-card agent-rejected" @zoomInOnEnter>
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h5>Agent Rejected</h5>
+          <p class="metric-value">{{ agentRejected }}</p>
+          <p class="metric-change">{{ (agentRejected / totalClaims * 100 || 0) | number:'1.0-1' }}% of total</p>
+        </div>
+      </div>
+  
+      <div class="metric-card admin-approved" @zoomInOnEnter>
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h5>Admin Approved</h5>
+          <p class="metric-value">{{ adminApproved }}</p>
+          <p class="metric-change">{{ (adminApproved / totalClaims * 100 || 0) | number:'1.0-1' }}% of total</p>
+        </div>
+      </div>
+  
+      <div class="metric-card admin-rejected" @zoomInOnEnter>
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h5>Admin Rejected</h5>
+          <p class="metric-value">{{ adminRejected }}</p>
+          <p class="metric-change">{{ (adminRejected / totalClaims * 100 || 0) | number:'1.0-1' }}% of total</p>
+        </div>
+      </div>
+  
+      <div class="metric-card pending-review" @zoomInOnEnter>
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 8v4"></path>
+            <path d="M12 16h.01"></path>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h5>Pending Review</h5>
+          <p class="metric-value">{{ pendingFinal }}</p>
+          <p class="metric-change">{{ (pendingFinal / totalClaims * 100 || 0) | number:'1.0-1' }}% of total</p>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Charts Section -->
+    <div class="charts-grid" @fadeInUpOnEnter>
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3>Final Decision Distribution</h3>
+          <div class="chart-legend">
+            <span class="legend approved"></span> Approved
+            <span class="legend rejected"></span> Rejected
+            <span class="legend pending"></span> Pending
+          </div>
+        </div>
+        <div class="chart-wrapper">
+            <canvas baseChart 
+            [data]="pieChartData" 
+            [type]="'pie'"
+            [options]="pieChartOptions">
+          </canvas>
+        </div>
+      </div>
+  
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3>Agent Decisions Overview</h3>
+          <div class="chart-legend">
+            <span class="legend approved"></span> Approved
+            <span class="legend rejected"></span> Rejected
+            <span class="legend total"></span> Total
+          </div>
+        </div>
+        <div class="chart-wrapper">
+            <canvas baseChart 
+            [data]="barChartData" 
+            [type]="'bar'"
+            [options]="barChartOptions">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>

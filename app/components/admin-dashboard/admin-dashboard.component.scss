@@ -1,0 +1,185 @@
+/* Main Dashboard Styling - Improved */
+.container.my-4 {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  h2.text-center {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+    
+    &::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: #3498db;
+      margin: 0.75rem auto 0;
+      border-radius: 3px;
+    }
+  }
+
+  /* Search Input - Enhanced */
+  .input-group.w-50 {
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    
+    .form-control {
+      border: none;
+      padding: 0.75rem 1.25rem;
+      background: #f8f9fa;
+      
+      &:focus {
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        background: white;
+      }
+    }
+  }
+
+  /* Table - Enhanced */
+  .table {
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    
+    thead {
+      background-color: #3498db;
+      color: white;
+      
+      th {
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        &:first-child {
+          border-top-left-radius: 8px;
+        }
+        &:last-child {
+          border-top-right-radius: 8px;
+        }
+      }
+    }
+    
+    tbody {
+      tr {
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background-color: #f8f9fa;
+        }
+        
+        td {
+          padding: 0.75rem 1rem;
+          border-top: 1px solid #ecf0f1;
+          
+          .badge {
+            font-size: 0.7rem;
+            padding: 0.4rem 0.6rem;
+            font-weight: 600;
+            border-radius: 4px;
+            
+            &.bg-warning {
+              background-color: #f39c12 !important;
+              color: white;
+            }
+            
+            &.bg-success {
+              background-color: #2ecc71 !important;
+            }
+            
+            &.bg-danger {
+              background-color: #e74c3c !important;
+            }
+          }
+          
+          .btn-sm {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            
+            &.btn-primary {
+              &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* Loading/Empty States */
+  div.text-muted.text-center {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* EXACTLY YOUR EXISTING MODAL CSS - UNCHANGED */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 600px;
+  width: 100%;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .container.my-4 {
+    padding: 1rem;
+    
+    .input-group.w-50 {
+      width: 100% !important;
+    }
+    
+    .table {
+      display: block;
+      overflow-x: auto;
+      
+      thead th {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+      }
+      
+      tbody td {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+      }
+    }
+  }
+}

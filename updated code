@@ -1,16 +1,91 @@
-const express = require('express');
-const router = express.Router();
-const upload = require('../middleware/upload');
-const ClaimController = require('../controllers/claimControllers');
+const claimService = require('../services/claimService');
 
-router.get('/', ClaimController.getClaims);
-router.post('/', upload.fields([
-  { name: 'photos', maxCount: 5 },
-  { name: 'policeReport', maxCount: 1 }
-]), ClaimController.submitClaim);
-router.put('/:id/approve', ClaimController.agentApprove);
-router.put('/:id/reject', ClaimController.agentReject);
-router.put('/:id/admin-approve', ClaimController.adminApprove);
-router.put('/:id/admin-reject', ClaimController.adminReject);
+// GET /api/claims?status=APPROVED&email=user@example.com
+exports.getClaims = async (req, res) => {
+  try {
+    const { status, email } = req.query;
+    const filters = {};
 
-module.exports = router;
+    if (status) filters.status = status.toUpperCase();
+    if (email) filters.email = email.toLowerCase();
+
+    const claims = await claimService.getClaims(filters);
+    res.status(200).json(claims);
+  } catch (error) {
+    console.error('❌ Error fetching claims:', error.message);
+    res.status(500).json({ error: 'Server error while fetching claims' });
+  }
+};
+
+// POST /api/claims
+exports.submitClaim = async (req, res) => {
+  try {
+    const claim = await claimService.submitClaim(req.body, req.files);
+    res.status(201).json({ message: 'Claim submitted successfully!', data: claim });
+  } catch (error) {
+    console.error('❌ Claim submission failed:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// PUT /api/claims/:id/approve (Agent approves)
+exports.agentApprove = async (req, res) => {
+  try {
+    const updated = await claimService.updateAgentStatus(req.params.id, 'APPROVED');
+    if (!updated) return res.status(404).json({ error: 'Claim not found' });
+
+    res.status(200).json({ message: 'Claim approved by agent', data: updated });
+  } catch (error) {
+    console.error('❌ Error approving claim:', error.message);
+    res.status(500).json({ error: 'Server error while approving claim' });
+  }
+};
+
+// PUT /api/claims/:id/reject (Agent rejects)
+exports.agentReject = async (req, res) => {
+  try {
+    const { rejectionReason } = req.body;
+    if (!rejectionReason || rejectionReason.trim() === '') {
+      return res.status(400).json({ error: 'Rejection reason is required' });
+    }
+
+    const updated = await claimService.updateAgentStatus(req.params.id, 'REJECTED', rejectionReason);
+    if (!updated) return res.status(404).json({ error: 'Claim not found' });
+
+    res.status(200).json({ message: 'Claim rejected by agent', data: updated });
+  } catch (error) {
+    console.error('❌ Error rejecting claim:', error.message);
+    res.status(500).json({ error: 'Server error while rejecting claim' });
+  }
+};
+
+// PUT /api/claims/:id/admin-approve
+exports.adminApprove = async (req, res) => {
+  try {
+    const updated = await claimService.updateAdminStatus(req.params.id, 'ADMIN_APPROVED');
+    if (!updated) return res.status(404).json({ error: 'Claim not found' });
+
+    res.status(200).json({ message: 'Claim approved by admin', data: updated });
+  } catch (error) {
+    console.error('❌ Error admin-approving claim:', error.message);
+    res.status(500).json({ error: 'Server error while admin-approving claim' });
+  }
+};
+
+// PUT /api/claims/:id/admin-reject
+exports.adminReject = async (req, res) => {
+  try {
+    const { adminRejectionReason } = req.body;
+    if (!adminRejectionReason || adminRejectionReason.trim() === '') {
+      return res.status(400).json({ error: 'Admin rejection reason is required' });
+    }
+
+    const updated = await claimService.updateAdminStatus(req.params.id, 'ADMIN_REJECTED', adminRejectionReason);
+    if (!updated) return res.status(404).json({ error: 'Claim not found' });
+
+    res.status(200).json({ message: 'Claim rejected by admin', data: updated });
+  } catch (error) {
+    console.error('❌ Error admin-rejecting claim:', error.message);
+    res.status(500).json({ error: 'Server error while admin-rejecting claim' });
+  }
+};

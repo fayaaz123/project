@@ -1,91 +1,63 @@
-const claimService = require('../services/claimService');
+const Claim = require('../models/claim');
 
-// GET /api/claims?status=APPROVED&email=user@example.com
-exports.getClaims = async (req, res) => {
-  try {
-    const { status, email } = req.query;
-    const filters = {};
+function generateClaimId() {
+  const numbers = Math.floor(100 + Math.random() * 900);
+  const letters = Array(3).fill('').map(() =>
+    String.fromCharCode(65 + Math.floor(Math.random() * 26))
+  ).join('');
+  return `${numbers}${letters}`;
+}
 
-    if (status) filters.status = status.toUpperCase();
-    if (email) filters.email = email.toLowerCase();
-
-    const claims = await claimService.getClaims(filters);
-    res.status(200).json(claims);
-  } catch (error) {
-    console.error('❌ Error fetching claims:', error.message);
-    res.status(500).json({ error: 'Server error while fetching claims' });
-  }
+exports.getClaims = async (filters) => {
+  return await Claim.find(filters).sort({ createdAt: -1 });
 };
 
-// POST /api/claims
-exports.submitClaim = async (req, res) => {
-  try {
-    const claim = await claimService.submitClaim(req.body, req.files);
-    res.status(201).json({ message: 'Claim submitted successfully!', data: claim });
-  } catch (error) {
-    console.error('❌ Claim submission failed:', error.message);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+exports.submitClaim = async (body, files) => {
+  const {
+    fullName, email, reason, customReason,
+    explanation, street, city, state, pincode
+  } = body;
+
+  const photoPaths = (files['photos'] || []).map(file => file.path);
+  const policeReportPath = files['policeReport']?.[0]?.path || null;
+
+  const newClaim = new Claim({
+    claimId: generateClaimId(),
+    fullName,
+    email: email.toLowerCase(),
+    reason,
+    customReason,
+    explanation,
+    location: { street, city, state, pincode },
+    photos: photoPaths,
+    policeReport: policeReportPath,
+    status: 'OPEN',
+    rejectionReason: null,
+    adminFinalStatus: 'PENDING',
+    adminRejectionReason: null
+  });
+
+  return await newClaim.save();
 };
 
-// PUT /api/claims/:id/approve (Agent approves)
-exports.agentApprove = async (req, res) => {
-  try {
-    const updated = await claimService.updateAgentStatus(req.params.id, 'APPROVED');
-    if (!updated) return res.status(404).json({ error: 'Claim not found' });
-
-    res.status(200).json({ message: 'Claim approved by agent', data: updated });
-  } catch (error) {
-    console.error('❌ Error approving claim:', error.message);
-    res.status(500).json({ error: 'Server error while approving claim' });
-  }
+exports.updateAgentStatus = async (claimId, status, rejectionReason = null) => {
+  return await Claim.findOneAndUpdate(
+    { claimId },
+    {
+      status,
+      rejectionReason: status === 'REJECTED' ? rejectionReason : null
+    },
+    { new: true }
+  );
 };
 
-// PUT /api/claims/:id/reject (Agent rejects)
-exports.agentReject = async (req, res) => {
-  try {
-    const { rejectionReason } = req.body;
-    if (!rejectionReason || rejectionReason.trim() === '') {
-      return res.status(400).json({ error: 'Rejection reason is required' });
-    }
-
-    const updated = await claimService.updateAgentStatus(req.params.id, 'REJECTED', rejectionReason);
-    if (!updated) return res.status(404).json({ error: 'Claim not found' });
-
-    res.status(200).json({ message: 'Claim rejected by agent', data: updated });
-  } catch (error) {
-    console.error('❌ Error rejecting claim:', error.message);
-    res.status(500).json({ error: 'Server error while rejecting claim' });
-  }
-};
-
-// PUT /api/claims/:id/admin-approve
-exports.adminApprove = async (req, res) => {
-  try {
-    const updated = await claimService.updateAdminStatus(req.params.id, 'ADMIN_APPROVED');
-    if (!updated) return res.status(404).json({ error: 'Claim not found' });
-
-    res.status(200).json({ message: 'Claim approved by admin', data: updated });
-  } catch (error) {
-    console.error('❌ Error admin-approving claim:', error.message);
-    res.status(500).json({ error: 'Server error while admin-approving claim' });
-  }
-};
-
-// PUT /api/claims/:id/admin-reject
-exports.adminReject = async (req, res) => {
-  try {
-    const { adminRejectionReason } = req.body;
-    if (!adminRejectionReason || adminRejectionReason.trim() === '') {
-      return res.status(400).json({ error: 'Admin rejection reason is required' });
-    }
-
-    const updated = await claimService.updateAdminStatus(req.params.id, 'ADMIN_REJECTED', adminRejectionReason);
-    if (!updated) return res.status(404).json({ error: 'Claim not found' });
-
-    res.status(200).json({ message: 'Claim rejected by admin', data: updated });
-  } catch (error) {
-    console.error('❌ Error admin-rejecting claim:', error.message);
-    res.status(500).json({ error: 'Server error while admin-rejecting claim' });
-  }
+exports.updateAdminStatus = async (claimId, adminFinalStatus, adminRejectionReason = null) => {
+  return await Claim.findOneAndUpdate(
+    { claimId },
+    {
+      adminFinalStatus,
+      adminRejectionReason: adminFinalStatus === 'ADMIN_REJECTED' ? adminRejectionReason : null
+    },
+    { new: true }
+  );
 };
